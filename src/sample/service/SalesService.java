@@ -12,6 +12,11 @@ public class SalesService {
     public List<Sale> loadSales() {
 
         List<Sale> sales = new ArrayList<>();
+        File file = new File(filePath);
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
 

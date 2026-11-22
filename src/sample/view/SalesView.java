@@ -33,8 +33,10 @@ public class SalesView {
         quantityField.setPromptText("Amount");
 
         sellButton = new Button("Sell");
+        Button closeButton = new Button("Close");
+        closeButton.setOnAction(event -> stage.close());
 
-        HBox form = new HBox(10, medicineBox, quantityField, sellButton);
+        HBox form = new HBox(10, medicineBox, quantityField, sellButton, closeButton);
 
         salesTable = new TableView<>();
         salesTable.setItems(sales);

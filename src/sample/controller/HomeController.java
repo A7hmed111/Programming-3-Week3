@@ -57,6 +57,7 @@ public class HomeController {
         if (userService.isAuthorized(userName, password)) {
 
             medicineController.getView().setUserName(userName);
+            medicineController.setLoggedInUserName(userName);
 
             medicineController.getView().setLoggedIn(true);
 
@@ -96,6 +97,7 @@ public class HomeController {
                 .setOnAction(e -> {
                     view.clearFields();
                     medicineController.getView().setUserName("");
+                    medicineController.setLoggedInUserName("");
                     medicineController.getView().setLoggedIn(false);
                     medicineController.getView()
                             .setCenterContent(view.getRoot());
@@ -120,6 +122,8 @@ public class HomeController {
 
             signUpStage.setTitle("Sign Up");
             signUpStage.setScene(scene);
+            signUpView.getCancelButton().setOnAction(event ->
+                    signUpStage.close());
 
             signUpView.getCreateAccountButton().setOnAction(event -> {
 
@@ -146,6 +150,15 @@ public class HomeController {
                             Alert.AlertType.ERROR,
                             "Password Error",
                             "Passwords do not match."
+                    );
+                    return;
+                }
+
+                if (password.length() < 4) {
+                    showAlert(
+                            Alert.AlertType.WARNING,
+                            "Password Error",
+                            "Password must be at least 4 characters."
                     );
                     return;
                 }
@@ -199,6 +212,7 @@ public class HomeController {
                 .setOnAction(e -> {
                     view.clearFields();
                     medicineController.getView().setUserName("");
+                    medicineController.setLoggedInUserName("");
                     medicineController.getView().setLoggedIn(false);
                     medicineController.getView()
                             .setCenterContent(view.getRoot());

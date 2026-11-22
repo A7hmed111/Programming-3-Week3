@@ -18,6 +18,7 @@ public class SalesController {
     private final MedicineService medicineService;
     private final SalesService salesService;
     private final SalesView view;
+    private final Runnable onSaleCompleted;
 
     public SalesController(ObservableList<Medicine> medicines) {
         this(medicines, null);
@@ -28,6 +29,7 @@ public class SalesController {
             Runnable onSaleCompleted) {
 
         this.medicines = medicines;
+        this.onSaleCompleted = onSaleCompleted;
 
         medicineService = new MedicineService();
         salesService = new SalesService();

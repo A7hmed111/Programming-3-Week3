@@ -11,6 +11,7 @@ import sample.view.EditMedicineView;
 import sample.view.MedicinesPageView;
 import sample.view.MedicineView;
 import sample.view.SettingsView;
+import sample.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,8 @@ public class MedicineController {
 
     private final MedicineView view;
     private final MedicineService service;
+    private final UserService userService;
+    private String loggedInUserName = "";
 
     private final ObservableList<Medicine>
             allMedicines;
@@ -34,6 +37,9 @@ public class MedicineController {
 
         service =
                 new MedicineService();
+
+        userService =
+                new UserService();
 
         allMedicines =
                 FXCollections.observableArrayList(
@@ -314,6 +320,16 @@ public class MedicineController {
                 );
 
                 return;
+            }
+
+            for (Medicine existing : allMedicines) {
+                if (existing.getName().equalsIgnoreCase(name)) {
+                    showAlert(
+                            "Invalid Data",
+                            "A medicine with this name already exists."
+                    );
+                    return;
+                }
             }
 
             // -------------------------
@@ -632,7 +648,10 @@ public class MedicineController {
 
         view.getSettingsButton()
                 .setOnAction(event ->
-                        new SettingsView().show());
+                        new SettingsView(
+                                userService,
+                                loggedInUserName
+                        ).show());
     }
 
     // =========================================================
@@ -642,5 +661,9 @@ public class MedicineController {
     public MedicineView getView() {
 
         return view;
+    }
+
+    public void setLoggedInUserName(String userName) {
+        loggedInUserName = userName == null ? "" : userName;
     }
 }

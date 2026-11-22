@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import sample.service.UserService;
 
 public class SettingsView {
 
@@ -19,10 +20,13 @@ public class SettingsView {
     private PasswordField newPasswordField;
     private PasswordField confirmPasswordField;
 
-    private String currentPassword = "1234";
+    private final UserService userService;
+    private final String userName;
 
-    public SettingsView() {
+    public SettingsView(UserService userService, String userName) {
         stage = new Stage();
+        this.userService = userService;
+        this.userName = userName;
     }
 
     public void show() {
@@ -75,7 +79,7 @@ public class SettingsView {
 
     private void changePassword() {
 
-        if (!oldPasswordField.getText().equals(currentPassword)) {
+        if (!userService.isAuthorized(userName, oldPasswordField.getText())) {
             showAlert("Error", "Current password is incorrect!");
             return;
         }
@@ -95,7 +99,10 @@ public class SettingsView {
             return;
         }
 
-        currentPassword = newPasswordField.getText();
+        if (!userService.changePassword(userName, newPasswordField.getText())) {
+            showAlert("Error", "Could not save the new password.");
+            return;
+        }
 
         showAlert("Success", "Password changed successfully!");
 

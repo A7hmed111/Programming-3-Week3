@@ -694,7 +694,7 @@ public class MedicineView {
 
     public void setLoggedIn(boolean loggedIn) {
 
-        homeButton.setDisable(loggedIn);
+        homeButton.setDisable(false);
         medicinesButton.setDisable(!loggedIn);
         salesButton.setDisable(!loggedIn);
         reportsButton.setDisable(!loggedIn);

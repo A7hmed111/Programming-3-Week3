@@ -22,6 +22,7 @@ public class SignUpView {
     private final PasswordField confirmPasswordField;
 
     private final Button createAccountButton;
+    private final Button cancelButton;
 
 
     public SignUpView() {
@@ -48,6 +49,7 @@ public class SignUpView {
         confirmPasswordField.setPromptText("Confirm your password");
 
         createAccountButton = new Button("Create Account");
+        cancelButton = new Button("Cancel");
 
         HBox userNamePane = new HBox(48);
         HBox passwordPane = new HBox(56);
@@ -72,6 +74,7 @@ public class SignUpView {
         buttonPane.getChildren().add(
                 createAccountButton
         );
+        buttonPane.getChildren().add(cancelButton);
 
         buttonPane.setAlignment(Pos.CENTER);
 
@@ -113,6 +116,10 @@ public class SignUpView {
 
     public Button getCreateAccountButton() {
         return createAccountButton;
+    }
+
+    public Button getCancelButton() {
+        return cancelButton;
     }
 
     public String getUserName() {

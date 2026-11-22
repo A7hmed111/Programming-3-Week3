@@ -1,308 +1,138 @@
-
 package sample.controller;
 
-import javafx.concurrent.Task;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
-
 import sample.model.Medicine;
+import sample.model.Sale;
 import sample.service.MedicineService;
 import sample.service.SalesService;
 import sample.view.SalesView;
 
+import java.util.List;
+
 public class SalesController {
 
+    private final ObservableList<Medicine> medicines;
+    private final ObservableList<Sale> sales;
+    private final MedicineService medicineService;
     private final SalesService salesService;
     private final SalesView view;
-    private final String cashierName;
 
-    public SalesController(
-            MedicineService medicineService,
-            String cashierName) {
+    public SalesController(ObservableList<Medicine> medicines) {
 
-        this.salesService = new SalesService(medicineService);
-        this.cashierName = cashierName;
+        this.medicines = medicines;
 
-        view = new SalesView(cashierName);
+        medicineService = new MedicineService();
+        salesService = new SalesService();
 
-        loadMedicines();
-
-        setupMedicineSelection();
-
-        setupSellButton();
-
-        view.getStage().showAndWait();
-    }
-
-    // =====================================================
-    // LOAD MEDICINES
-    // =====================================================
-
-    private void loadMedicines() {
-
-        view.setMedicines(
-                salesService.loadMedicines()
+        sales = FXCollections.observableArrayList(
+                salesService.loadSales()
         );
+
+        view = new SalesView(sales);
+
+        refreshMedicineBox();
+        updateTotal();
+
+        view.getSellButton().setOnAction(event -> sellMedicine());
+
+        view.show();
     }
 
-    // =====================================================
-    // MEDICINE SELECTION
-    // =====================================================
+    private void refreshMedicineBox() {
 
-    private void setupMedicineSelection() {
+        view.getMedicineBox().getItems().clear();
 
-        view.getMedicineComboBox()
-                .setOnAction(event -> {
-
-                    Medicine medicine =
-                            view.getMedicineComboBox().getValue();
-
-                    if (medicine != null) {
-
-                        view.getStockLabel().setText(
-                                "Available stock: "
-                                        + medicine.getQuantity()
-                        );
-
-                        view.getPriceLabel().setText(
-                                "Unit price: "
-                                        + medicine.getPrice()
-                        );
-
-                        updateTotal();
-                    }
-                });
-
-        view.getQuantityField()
-                .textProperty()
-                .addListener(
-                        (observable, oldValue, newValue) ->
-                                updateTotal()
-                );
+        for (Medicine medicine : medicines) {
+            view.getMedicineBox().getItems().add(
+                    medicine.getName()
+            );
+        }
     }
 
+    private void sellMedicine() {
 
-    private void updateTotal() {
+        String name = view.getMedicineBox().getValue();
 
-        Medicine medicine =
-                view.getMedicineComboBox().getValue();
-
-        if (medicine == null) {
-
-            view.getTotalLabel().setText("Total: -");
+        if (name == null) {
+            showAlert("Please select a medicine.");
             return;
         }
 
         try {
 
-            int quantity = Integer.parseInt(
+            int amount = Integer.parseInt(
                     view.getQuantityField().getText()
             );
 
-            if (quantity <= 0) {
-
-                view.getTotalLabel().setText("Total: -");
+            if (amount <= 0) {
+                showAlert("Amount must be greater than zero.");
                 return;
             }
 
-            double total =
-                    medicine.getPrice() * quantity;
+            Medicine selected = null;
 
-            view.getTotalLabel().setText(
-                    String.format("Total: %.2f", total)
+            for (Medicine medicine : medicines) {
+                if (medicine.getName().equals(name)) {
+                    selected = medicine;
+                    break;
+                }
+            }
+
+            if (selected == null || amount > selected.getQuantity()) {
+                showAlert("Not enough stock available.");
+                return;
+            }
+
+            Medicine updated = new Medicine(
+                    selected.getName(),
+                    selected.getPrice(),
+                    selected.getQuantity() - amount
             );
+
+            medicineService.updateMedicine(selected, updated);
+
+            int index = medicines.indexOf(selected);
+            medicines.set(index, updated);
+
+            Sale sale = new Sale(
+                    selected.getName(),
+                    selected.getPrice(),
+                    amount
+            );
+
+            salesService.addSale(sale);
+            sales.add(sale);
+
+            view.getSalesTable().refresh();
+            updateTotal();
+
+            view.getQuantityField().clear();
+
+            showAlert("Sale completed successfully.");
 
         } catch (NumberFormatException e) {
-
-            view.getTotalLabel().setText("Total: -");
+            showAlert("Enter a valid quantity.");
         }
     }
 
-    // =====================================================
-    // SELL BUTTON
-    // =====================================================
+    private void updateTotal() {
 
-    private void setupSellButton() {
+        double total = 0;
 
-        view.getSellButton()
-                .setOnAction(event -> processSale());
-    }
-
-    // =====================================================
-    // PROCESS SALE USING BACKGROUND THREAD
-    // =====================================================
-
-    private void processSale() {
-
-        Medicine selectedMedicine =
-                view.getMedicineComboBox().getValue();
-
-        if (selectedMedicine == null) {
-
-            showAlert(
-                    Alert.AlertType.WARNING,
-                    "Select Medicine",
-                    "Please select a medicine."
-            );
-
-            return;
+        for (Sale sale : sales) {
+            total += sale.getTotalPrice();
         }
 
-        int quantity;
-
-        try {
-
-            quantity = Integer.parseInt(
-                    view.getQuantityField().getText()
-            );
-
-            if (quantity <= 0) {
-                throw new NumberFormatException();
-            }
-
-        } catch (NumberFormatException e) {
-
-            showAlert(
-                    Alert.AlertType.WARNING,
-                    "Invalid Quantity",
-                    "Please enter a valid positive quantity."
-            );
-
-            return;
-        }
-
-        String medicineName =
-                selectedMedicine.getName();
-
-        double total =
-                selectedMedicine.getPrice() * quantity;
-
-        boolean useSynchronization =
-                view.getWithSyncRadio().isSelected();
-
-        // Create background Task
-
-        Task<Boolean> saleTask = new Task<Boolean>() {
-
-            @Override
-            protected Boolean call() {
-
-                return salesService.sellMedicine(
-                        medicineName,
-                        quantity,
-                        useSynchronization
-                );
-            }
-        };
-
-        view.getSellButton().setDisable(true);
-
-        // =================================================
-        // TASK SUCCEEDED
-        // =================================================
-
-        saleTask.setOnSucceeded(event -> {
-
-            view.getSellButton().setDisable(false);
-
-            boolean success = saleTask.getValue();
-
-            if (success) {
-
-                showAlert(
-                        Alert.AlertType.INFORMATION,
-                        "Sale Completed",
-                        "Cashier: " + cashierName
-                                + "\nMedicine: " + medicineName
-                                + "\nQuantity: " + quantity
-                                + "\nTotal: " + total
-                                + "\nMode: "
-                                + (useSynchronization
-                                ? "With Synchronization"
-                                : "Without Synchronization")
-                );
-
-                loadMedicines();
-
-                view.getMedicineComboBox()
-                        .getSelectionModel()
-                        .clearSelection();
-
-                view.getQuantityField().clear();
-
-                view.getStockLabel().setText(
-                        "Available stock: -"
-                );
-
-                view.getPriceLabel().setText(
-                        "Unit price: -"
-                );
-
-                view.getTotalLabel().setText(
-                        "Total: -"
-                );
-
-            } else {
-
-                // Reload stock because another cashier
-                // may have changed the available quantity
-
-                loadMedicines();
-
-                showAlert(
-                        Alert.AlertType.WARNING,
-                        "Sale Failed",
-                        "Medicine not found or insufficient stock."
-                );
-            }
-        });
-
-        // =================================================
-        // TASK FAILED   task fails to execute call
-        // =================================================
-
-        saleTask.setOnFailed(event -> {
-
-            view.getSellButton().setDisable(false);
-
-            Throwable error = saleTask.getException();
-
-            if (error != null) {
-                error.printStackTrace();
-            }
-
-            showAlert(
-                    Alert.AlertType.ERROR,
-                    "Error",
-                    "An error occurred during the sale."
-            );
-        });
-
-        // =================================================
-        // START BACKGROUND THREAD
-        // =================================================
-
-        Thread cashierThread = new Thread(saleTask);
-
-
-
-        cashierThread.start();
+        view.updateTotal(total);
     }
 
-    // =====================================================
-    // ALERT
-    // =====================================================
+    private void showAlert(String message) {
 
-    private void showAlert(
-            Alert.AlertType type,
-            String title,
-            String message) {
-
-        Alert alert = new Alert(type);
-
-        alert.setTitle(title);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setHeaderText(null);
         alert.setContentText(message);
-
         alert.showAndWait();
     }
 }

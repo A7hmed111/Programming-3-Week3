@@ -1,48 +1,54 @@
-
 package sample.service;
 
-import sample.model.Medicine;
-
+import sample.model.Sale;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SalesService {
 
-    private final MedicineService medicineService;
+    private final String filePath = "Week3/Data/sales.txt";
 
-    public SalesService(MedicineService medicineService) {
-        this.medicineService = medicineService;
+    public List<Sale> loadSales() {
+
+        List<Sale> sales = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] parts = line.split(",");
+
+                sales.add(new Sale(
+                        parts[0],
+                        Double.parseDouble(parts[1]),
+                        Integer.parseInt(parts[2])
+                ));
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return sales;
     }
 
-    // =====================================================
-    // LOAD MEDICINES
-    // =====================================================
+    public void addSale(Sale sale) {
 
-    public List<Medicine> loadMedicines() {
-        return medicineService.loadMedicines();
-    }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
 
-    // =====================================================
-    // SELL MEDICINE
-    // =====================================================
-
-    public boolean sellMedicine(
-            String medicineName,
-            int quantity,
-            boolean useSynchronization) {
-
-        if (useSynchronization) {
-
-            return medicineService.sellMedicine(
-                    medicineName,
-                    quantity
+            writer.write(
+                    sale.getMedicineName() + "," +
+                    sale.getPrice() + "," +
+                    sale.getAmountSold()
             );
 
-        } else {
+            writer.newLine();
 
-            return medicineService.sellMedicineWithoutSync(
-                    medicineName,
-                    quantity
-            );
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

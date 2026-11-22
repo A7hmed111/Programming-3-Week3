@@ -1,19 +1,15 @@
-
 package sample.view;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.Node;
+import javafx.scene.layout.StackPane;
 
 import sample.model.Medicine;
 
@@ -24,6 +20,9 @@ public class MedicineView {
     // =========================
 
     private final BorderPane root;
+
+    private final StackPane contentArea;
+    private final VBox medicineContent;
 
     // =========================
     // Controls
@@ -37,12 +36,25 @@ public class MedicineView {
 
     private Button editButton;
 
+    private Button medicinesButton;
+    private Button reportsButton;
     private Button salesButton;
+    private Button settingsButton;
+    private Button logoutButton;
 
+    private Label totalValueLabel;
+    private Label availableValueLabel;
+    private Label outOfStockValueLabel;
+
+    private Button homeButton;
+    private Label userLabel;
 
     public MedicineView() {
 
         root = new BorderPane();
+
+        contentArea = new StackPane();
+        medicineContent = createMainContent();
 
         createLayout();
     }
@@ -57,7 +69,9 @@ public class MedicineView {
 
         root.setLeft(createSidebar());
 
-        root.setCenter(createMainContent());
+        contentArea.getChildren().add(medicineContent);
+
+        root.setCenter(contentArea);
     }
 
     // =========================================================
@@ -80,8 +94,10 @@ public class MedicineView {
                 subtitle
         );
 
-        Label user =
-                new Label("Mohammed  ● Online");
+        userLabel = new Label("");
+
+        Label status =
+                new Label("● Online");
 
         HBox header =
                 new HBox();
@@ -103,7 +119,8 @@ public class MedicineView {
 
         header.getChildren().addAll(
                 branding,
-                user
+                userLabel,
+                status
         );
 
         HBox.setHgrow(
@@ -112,6 +129,10 @@ public class MedicineView {
         );
 
         return header;
+    }
+
+    public void setUserName(String userName) {
+        userLabel.setText(userName);
     }
 
     // =========================================================
@@ -136,16 +157,16 @@ public class MedicineView {
         Label dashboardTitle =
                 new Label("DASHBOARD");
 
-        Button homeButton =
+        homeButton =
                 createMenuButton("🏠  Home");
 
-        Button medicinesButton =
+        medicinesButton =
                 createMenuButton("💊  Medicines");
 
         salesButton =
                 createMenuButton("🛒  Sales");
 
-        Button reportsButton =
+        reportsButton =
                 createMenuButton("📊  Reports");
 
         // -------------------------
@@ -155,7 +176,7 @@ public class MedicineView {
         Label managementTitle =
                 new Label("MANAGEMENT");
 
-        //addButton &editbutton
+        //addButton & editbutton
         // دول انا مفعلهم المطلوب منكم تفعيل الباقى ك تاسك
 
         addButton =
@@ -165,7 +186,7 @@ public class MedicineView {
         editButton =
                 createMenuButton("✏  Edit Medicine");
 
-        Button settingsButton =
+        settingsButton =
                 createMenuButton("⚙  Settings");
 
         // -------------------------
@@ -184,7 +205,7 @@ public class MedicineView {
         // Logout
         // -------------------------
 
-        Button logoutButton =
+        logoutButton =
                 createMenuButton("🚪  Logout");
 
         // -------------------------
@@ -377,22 +398,26 @@ public class MedicineView {
         HBox cards =
                 new HBox(15);
 
+        totalValueLabel = new Label("0");
+        availableValueLabel = new Label("0");
+        outOfStockValueLabel = new Label("0");
+
         VBox totalCard =
                 createCard(
                         "Total Medicines",
-                        "120"
+                        totalValueLabel
                 );
 
         VBox availableCard =
                 createCard(
                         "Available",
-                        "108"
+                        availableValueLabel
                 );
 
         VBox outOfStockCard =
                 createCard(
                         "Out of Stock",
-                        "12"
+                        outOfStockValueLabel
                 );
 
         cards.getChildren().addAll(
@@ -413,14 +438,11 @@ public class MedicineView {
 
     private VBox createCard(
             String title,
-            String value
+            Label valueLabel
     ) {
 
         Label titleLabel =
                 new Label(title);
-
-        Label valueLabel =
-                new Label(value);
 
         VBox card =
                 new VBox(8);
@@ -439,6 +461,13 @@ public class MedicineView {
         );
 
         return card;
+    }
+
+    public void updateStatistics(int total, int available, int outOfStock) {
+
+        totalValueLabel.setText(String.valueOf(total));
+        availableValueLabel.setText(String.valueOf(available));
+        outOfStockValueLabel.setText(String.valueOf(outOfStock));
     }
 
     // =========================================================
@@ -618,7 +647,7 @@ public class MedicineView {
 
 
     // =========================================================
-    // GET EDIT BUTTON
+    // GET ADD BUTTON
     // =========================================================
 
     public Button getAddButton() {
@@ -626,13 +655,56 @@ public class MedicineView {
         return addButton;
     }
 
-    // =========================================================
-    // GET SALES BUTTON
-    // =========================================================
-
-    public Button getSalesButton() {
-
-        return salesButton;
+    // GET MEDICINES BUTTON
+    public Button getMedicinesButton() {
+        return medicinesButton;
     }
-}
 
+
+    // GET REPORTS BUTTON
+    public Button getReportsButton() {
+        return reportsButton;
+    }
+
+    // GET SETTINGS BUTTON
+    public Button getSettingsButton() {
+        return settingsButton;
+    }
+
+    // GET LOGOUT BUTTON
+    public Button getLogoutButton() {
+        return logoutButton;
+    }
+
+    // GET HOME BUTTON
+    public Button getHomeButton() {
+        return homeButton;
+    }
+
+    public void setCenterContent(Node content) {
+        contentArea.getChildren().setAll(content);
+    }
+
+    public void showMedicineContent() {
+        setCenterContent(medicineContent);
+    }
+
+    public Button getSalesButton() { return salesButton; }
+
+
+    public void setLoggedIn(boolean loggedIn) {
+
+        homeButton.setDisable(loggedIn);
+        medicinesButton.setDisable(!loggedIn);
+        salesButton.setDisable(!loggedIn);
+        reportsButton.setDisable(!loggedIn);
+        addButton.setDisable(!loggedIn);
+        editButton.setDisable(!loggedIn);
+        settingsButton.setDisable(!loggedIn);
+        logoutButton.setDisable(!loggedIn);
+        medicineContent.setDisable(!loggedIn);
+
+    }
+
+
+}

@@ -3,13 +3,16 @@ package sample.controller;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
-import sample.controller.SalesController;
-import javafx.scene.input.KeyCode;
+
 import sample.model.Medicine;
 import sample.service.MedicineService;
 import sample.view.AddMedicineView;
 import sample.view.EditMedicineView;
+import sample.view.MedicinesPageView;
 import sample.view.MedicineView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MedicineController {
 
@@ -18,6 +21,10 @@ public class MedicineController {
 
     private final ObservableList<Medicine>
             allMedicines;
+
+    private final List<MedicinesPageView>
+            openMedicinesPages =
+            new ArrayList<>();
 
     public MedicineController() {
 
@@ -35,11 +42,7 @@ public class MedicineController {
         view.getMedicineTable()
                 .setItems(allMedicines);
 
-
-
-        setupMouseEvents();
-
-        setupKeyboardEvents();
+        updateMainStatistics();
 
         setupSearch();
 
@@ -47,7 +50,148 @@ public class MedicineController {
 
         setupEditButton();
 
-        setupSalesButton();
+        setupMedicinesButton();
+
+        setupReportsButton();
+    }
+
+    // =========================================================
+    // STATISTICS
+    // =========================================================
+
+    private void updateMainStatistics() {
+
+        int total =
+                allMedicines.size();
+
+        int available = 0;
+
+        int outOfStock = 0;
+
+        for (Medicine medicine :
+                allMedicines) {
+
+            if (medicine.getQuantity() > 0) {
+
+                available++;
+
+            } else {
+
+                outOfStock++;
+            }
+        }
+
+        view.updateStatistics(
+                total,
+                available,
+                outOfStock
+        );
+    }
+
+    // =========================================================
+    // MEDICINES BUTTON (OPEN IN NEW WINDOW)
+    // =========================================================
+
+    private void setupMedicinesButton() {
+
+        view.getMedicinesButton()
+                .setOnAction(event -> {
+
+                    MedicinesPageView pageView =
+                            new MedicinesPageView(
+                                    allMedicines
+                            );
+
+                    pageView.refreshStatistics(
+                            allMedicines
+                    );
+
+                    openMedicinesPages.add(
+                            pageView
+                    );
+
+                    pageView.getStage()
+                            .setOnHidden(e -> {
+
+                                openMedicinesPages.remove(
+                                        pageView
+                                );
+                            });
+
+                    pageView.getSearchField()
+                            .textProperty()
+                            .addListener(
+                                    (observable,
+                                     oldValue,
+                                     newValue) -> {
+
+                                        filterPageMedicines(
+                                                pageView,
+                                                newValue
+                                        );
+                                    }
+                            );
+
+                    pageView.getSearchButton()
+                            .setOnAction(e -> {
+
+                                filterPageMedicines(
+                                        pageView,
+                                        pageView.getSearchField()
+                                                .getText()
+                                );
+                            });
+
+                    pageView.show();
+                });
+    }
+
+    private void filterPageMedicines(
+            MedicinesPageView pageView,
+            String searchText) {
+
+        ObservableList<Medicine>
+                filtered =
+                FXCollections.observableArrayList();
+
+        String search =
+                searchText
+                        .toLowerCase()
+                        .trim();
+
+        for (Medicine medicine :
+                allMedicines) {
+
+            if (medicine.getName()
+                    .toLowerCase()
+                    .startsWith(search)) {
+
+                filtered.add(medicine);
+            }
+        }
+
+        pageView.getMedicineTable()
+                .setItems(filtered);
+    }
+
+    private void refreshOpenMedicinesPages() {
+
+        for (MedicinesPageView pageView :
+                openMedicinesPages) {
+
+            pageView.refreshStatistics(
+                    allMedicines
+            );
+
+            filterPageMedicines(
+                    pageView,
+                    pageView.getSearchField()
+                            .getText()
+            );
+
+            pageView.getMedicineTable()
+                    .refresh();
+        }
     }
 
     // =========================================================
@@ -68,12 +212,6 @@ public class MedicineController {
                             );
                         }
                 );
-
-
-
-
-
-
     }
 
     private void filterMedicines(
@@ -239,7 +377,7 @@ public class MedicineController {
             );
 
             // -------------------------
-            // Refresh Table
+            // Refresh Table & Stats
             // -------------------------
 
             view.getMedicineTable()
@@ -247,6 +385,10 @@ public class MedicineController {
 
             view.getMedicineTable()
                     .refresh();
+
+            updateMainStatistics();
+
+            refreshOpenMedicinesPages();
 
             // -------------------------
             // Close Window
@@ -409,6 +551,10 @@ public class MedicineController {
             view.getMedicineTable()
                     .refresh();
 
+            updateMainStatistics();
+
+            refreshOpenMedicinesPages();
+
             editView.getStage()
                     .close();
 
@@ -449,112 +595,23 @@ public class MedicineController {
     }
 
     // =========================================================
-// MOUSE EVENTS
-// =========================================================
-    private void setupMouseEvents() {
-
-        // 1. Mouse Clicked
-        view.getSearchField().setOnMouseClicked(event -> {
-            System.out.println("Mouse Clicked");
-        });
-
-        // 2. Mouse Pressed
-        view.getSearchField().setOnMousePressed(event -> {
-            System.out.println("Mouse Pressed");
-        });
-
-        // 3. Mouse Released
-        view.getSearchField().setOnMouseReleased(event -> {
-            System.out.println("Mouse Released");
-        });
-
-        // 4. Mouse Entered
-        view.getSearchField().setOnMouseEntered(event -> {
-            System.out.println("Mouse Entered Search Field");
-        });
-
-        // 5. Mouse Exited
-        view.getSearchField().setOnMouseExited(event -> {
-            System.out.println("Mouse Exited Search Field");
-        });
-
-        // 6. Mouse Moved
-        view.getSearchField().setOnMouseMoved(event -> {
-            System.out.println("Mouse Moved");
-        });
-
-        // 7. Mouse Dragged
-        view.getSearchField().setOnMouseDragged(event -> {
-            System.out.println("Mouse Dragged");
-        });
-
-
-        view.getSearchField()
-                .setOnMouseClicked(event -> {
-
-                    if (event.getClickCount() == 2) {
-                        view.getSearchField().clear();
-                    }
-                });
-    }
-
+    // REPORTS BUTTON
     // =========================================================
-// KEYBOARD EVENTS
-// =========================================================
-    private void setupKeyboardEvents() {
 
-        // 1. Key Pressed
-        view.getSearchField().setOnKeyPressed(event -> {
+    private void setupReportsButton() {
 
-            System.out.println(
-                    "Key Pressed: " + event.getCode()
-            );
-
-            // Press ESC to clear search
-            if (event.getCode() == KeyCode.ESCAPE) {
-                view.getSearchField().clear();
-            }
-        });
-
-        // 2. Key Released
-        view.getSearchField().setOnKeyReleased(event -> {
-
-            System.out.println(
-                    "Key Released: " + event.getCode()
-            );
-        });
-
-        // 3. Key Typed
-        view.getSearchField().setOnKeyTyped(event -> {
-
-            System.out.println(
-                    "Key Typed: " + event.getCharacter()
-            );
-        });
-    }
-
-    // =====================================================
-// SALES BUTTON
-// =====================================================
-
-    private void setupSalesButton() {
-
-        view.getSalesButton()
+        view.getReportsButton()
                 .setOnAction(event -> {
 
-                    String cashierName =
-                            "Cashier " + System.currentTimeMillis();
+                    ReportsController reportsController =
+                            new ReportsController(
+                                    allMedicines
+                            );
 
-                    new SalesController(
-                            service,
-                            cashierName
-                    );
-
-                    allMedicines.setAll(service.loadMedicines());
-
-                    view.getMedicineTable().refresh();
+                    reportsController.openReports();
                 });
     }
+
     // =========================================================
     // GET VIEW
     // =========================================================

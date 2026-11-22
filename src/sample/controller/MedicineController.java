@@ -10,6 +10,7 @@ import sample.view.AddMedicineView;
 import sample.view.EditMedicineView;
 import sample.view.MedicinesPageView;
 import sample.view.MedicineView;
+import sample.view.SettingsView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,10 @@ public class MedicineController {
         setupMedicinesButton();
 
         setupReportsButton();
+
+        setupSalesButton();
+
+        setupSettingsButton();
     }
 
     // =========================================================
@@ -610,6 +615,24 @@ public class MedicineController {
 
                     reportsController.openReports();
                 });
+    }
+
+    private void setupSalesButton() {
+
+        view.getSalesButton()
+                .setOnAction(event ->
+                        new SalesController(allMedicines, () -> {
+                            updateMainStatistics();
+                            refreshOpenMedicinesPages();
+                            view.getMedicineTable().refresh();
+                        }));
+    }
+
+    private void setupSettingsButton() {
+
+        view.getSettingsButton()
+                .setOnAction(event ->
+                        new SettingsView().show());
     }
 
     // =========================================================

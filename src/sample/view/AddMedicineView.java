@@ -14,198 +14,170 @@ import javafx.stage.Stage;
 
 public class AddMedicineView {
 
-    private final Stage stage;
+        private final Stage stage;
 
-    private final TextField nameField;
-    private final TextField priceField;
-    private final TextField quantityField;
+        private final TextField nameField;
+        private final TextField priceField;
+        private final TextField quantityField;
 
-    private final Button saveButton;
-    private final Button cancelButton;
+        private final Button saveButton;
+        private final Button cancelButton;
 
-    public AddMedicineView() {
+        public AddMedicineView() {
 
-        stage = new Stage();
+                stage = new Stage();
 
-        stage.setTitle("Add Medicine");
+                stage.setTitle("Add Medicine");
 
-        stage.initModality(
-                Modality.APPLICATION_MODAL
-        );
+                stage.initModality(
+                                Modality.APPLICATION_MODAL);
 
-        // =========================
-        // Title
-        // =========================
+                // =========================
+                // Title
+                // =========================
 
-        Label title =
-                new Label("Add New Medicine");
+                Label title = new Label("Add New Medicine");
 
-        // =========================
-        // Labels
-        // =========================
+                // =========================
+                // Labels
+                // =========================
 
-        Label nameLabel =
-                new Label("Medicine Name");
+                Label nameLabel = new Label("Medicine Name");
 
-        Label priceLabel =
-                new Label("Price");
+                Label priceLabel = new Label("Price");
 
-        Label quantityLabel =
-                new Label("Quantity");
+                Label quantityLabel = new Label("Quantity");
 
-        // =========================
-        // Text Fields
-        // =========================
+                // =========================
+                // Text Fields
+                // =========================
 
-        nameField =
-                new TextField();
+                nameField = new TextField();
 
-        nameField.setPromptText(
-                "Enter medicine name"
-        );
+                nameField.setPromptText(
+                                "Enter medicine name");
 
-        priceField =
-                new TextField();
+                priceField = new TextField();
 
-        priceField.setPromptText(
-                "Enter price"
-        );
+                priceField.setPromptText(
+                                "Enter price");
 
-        quantityField =
-                new TextField();
+                quantityField = new TextField();
 
-        quantityField.setPromptText(
-                "Enter quantity"
-        );
+                quantityField.setPromptText(
+                                "Enter quantity");
 
-        // =========================
-        // Form
-        // =========================
+                // =========================
+                // Form
+                // =========================
 
-        GridPane form =
-                new GridPane();
+                GridPane form = new GridPane();
 
-        form.setHgap(15);
-        form.setVgap(15);
+                form.setHgap(15);
+                form.setVgap(15);
 
-        form.add(
-                nameLabel,
-                0,
-                0
-        );
+                form.add(
+                                nameLabel,
+                                0,
+                                0);
 
-        form.add(
-                nameField,
-                1,
-                0
-        );
+                form.add(
+                                nameField,
+                                1,
+                                0);
 
-        form.add(
-                priceLabel,
-                0,
-                1
-        );
+                form.add(
+                                priceLabel,
+                                0,
+                                1);
 
-        form.add(
-                priceField,
-                1,
-                1
-        );
+                form.add(
+                                priceField,
+                                1,
+                                1);
 
-        form.add(
-                quantityLabel,
-                0,
-                2
-        );
+                form.add(
+                                quantityLabel,
+                                0,
+                                2);
 
-        form.add(
-                quantityField,
-                1,
-                2
-        );
+                form.add(
+                                quantityField,
+                                1,
+                                2);
 
-        // =========================
-        // Buttons
-        // =========================
+                // =========================
+                // Buttons
+                // =========================
 
-        saveButton =
-                new Button("Save Medicine");
+                saveButton = new Button("Save Medicine");
 
-        cancelButton =
-                new Button("Cancel");
+                cancelButton = new Button("Cancel");
 
-        HBox buttons =
-                new HBox(10);
+                HBox buttons = new HBox(10);
 
-        buttons.setAlignment(
-                Pos.CENTER_RIGHT
-        );
+                buttons.setAlignment(
+                                Pos.CENTER_RIGHT);
 
-        buttons.getChildren().addAll(
-                saveButton,
-                cancelButton
-        );
+                buttons.getChildren().addAll(
+                                saveButton,
+                                cancelButton);
 
-        // =========================
-        // Root
-        // =========================
+                // =========================
+                // Root
+                // =========================
 
-        VBox root =
-                new VBox(20);
+                VBox root = new VBox(20);
 
-        root.setPadding(
-                new Insets(25)
-        );
+                root.setPadding(
+                                new Insets(25));
 
-        root.getChildren().addAll(
-                title,
-                form,
-                buttons
-        );
+                root.getChildren().addAll(
+                                title,
+                                form,
+                                buttons);
+
+                // =========================
+                // Scene
+                // =========================
+
+                Scene scene = new Scene(
+                                root,
+                                450,
+                                350);
+
+                stage.setScene(scene);
+        }
 
         // =========================
-        // Scene
+        // Getters
         // =========================
 
-        Scene scene =
-                new Scene(
-                        root,
-                        450,
-                        350
-                );
+        public Stage getStage() {
+                return stage;
+        }
 
-        stage.setScene(scene);
-    }
+        public TextField getNameField() {
+                return nameField;
+        }
 
-    // =========================
-    // Getters
-    // =========================
+        public TextField getPriceField() {
+                return priceField;
+        }
 
-    public Stage getStage() {
-        return stage;
-    }
+        public TextField getQuantityField() {
+                return quantityField;
+        }
 
-    public TextField getNameField() {
-        return nameField;
-    }
+        public Button getSaveButton() {
+                return saveButton;
+        }
 
-    public TextField getPriceField() {
-        return priceField;
-    }
+        public Button getCancelButton() {
+                return cancelButton;
+        }
 
-    public TextField getQuantityField() {
-        return quantityField;
-    }
-
-    public Button getSaveButton() {
-        return saveButton;
-    }
-
-    public Button getCancelButton() {
-        return cancelButton;
-    }
-
-    public void show() {
-        stage.showAndWait();
-    }
+        public void show() {
+                stage.showAndWait();
+        }
 }

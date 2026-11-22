@@ -20,6 +20,12 @@ public class SalesController {
     private final SalesView view;
 
     public SalesController(ObservableList<Medicine> medicines) {
+        this(medicines, null);
+    }
+
+    public SalesController(
+            ObservableList<Medicine> medicines,
+            Runnable onSaleCompleted) {
 
         this.medicines = medicines;
 
@@ -109,6 +115,10 @@ public class SalesController {
             updateTotal();
 
             view.getQuantityField().clear();
+
+            if (onSaleCompleted != null) {
+                onSaleCompleted.run();
+            }
 
             showAlert("Sale completed successfully.");
 

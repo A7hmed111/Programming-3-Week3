@@ -200,6 +200,8 @@ public class HomeController {
                     view.clearFields();
                     medicineController.getView().setUserName("");
                     medicineController.getView().setLoggedIn(false);
+                    medicineController.getView()
+                            .setCenterContent(view.getRoot());
                 });
     }
 

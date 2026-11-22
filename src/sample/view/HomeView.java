@@ -53,11 +53,15 @@ public class HomeView {
 
         root = new StackPane();
 
-        logo = new Image(
-                new File("Week3/Data/Logo.jpg").toURI().toString()
-        );
+        File logoFile = new File("Data", "Logo.jpg");
+        if (!logoFile.exists()) {
+            logoFile = new File("Week3/Data", "Logo.jpg");
+        }
+        logo = logoFile.exists()
+                ? new Image(logoFile.toURI().toString())
+                : null;
 
-        logoView = new ImageView(logo);
+        logoView = logo == null ? new ImageView() : new ImageView(logo);
         logoView.setFitWidth(200);
         logoView.setFitHeight(200);
         logoView.setPreserveRatio(true);
